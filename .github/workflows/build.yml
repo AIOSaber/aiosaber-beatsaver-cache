@@ -1,0 +1,38 @@
+name: 'Build'
+
+on:
+  push:
+    branches:
+      - '*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            asset_location: target/release/aiosaber-beatsaver-cache
+            asset_name: aiosaber-beatsaver-cache-linux
+          - os: windows-latest
+            asset_location: target/release/aiosaber-beatsaver-cache.exe
+            asset_name: aiosaber-beatsaver-cache-win.exe
+          - os: macos-latest
+            asset_location: target/release/aiosaber-beatsaver-cache
+            asset_name: aiosaber-beatsaver-cache-mac
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Build
+        run: cargo build --release --locked
+      - name: Provide archives
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.asset_name }}
+          path: ${{ matrix.asset_location }}
